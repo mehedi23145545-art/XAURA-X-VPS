@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>XAURA X VPS Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>XAURA X VPS Dashboard</h1>
+
+    <!-- Upload Form -->
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="zipfile" required>
+      <button type="submit">Upload Zip</button>
+    </form>
+
+    <!-- Uploaded Files -->
+    <h2>Uploaded Zips</h2>
+    <ul>
+      {% for file in files %}
+        <li>{{ file }} - <a href="/extract/{{ file }}">Extract</a></li>
+      {% endfor %}
+    </ul>
+
+    <!-- Extracted Folders & Run -->
+    <h2>Extracted Bots</h2>
+    <form action="/run" method="post">
+      <select name="folder" required>
+        {% for folder in extracted_files.keys() %}
+          <option value="{{ folder }}">{{ folder }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="mainfile" required>
+        {% for folder, flist in extracted_files.items() %}
+          {% for f in flist %}
+            <option value="{{ f }}">{{ f }} ({{ folder }})</option>
+          {% endfor %}
+        {% endfor %}
+      </select>
+      <button type="submit">Run Selected</button>
+    </form>
+
+    <a href="/stop">Stop Running Bot</a>
+
+    <!-- Console Output -->
+    <h2>Console Output</h2>
+    <div id="console-box" style="background:#000;color:#ff4d4d;padding:10px;height:300px;overflow-y:scroll;"></div>
+
+    <script>
+      function refreshConsole(){
+          fetch('/console')
+          .then(res => res.text())
+          .then(data => {
+              document.getElementById('console-box').innerHTML = data;
+              document.getElementById('console-box').scrollTop = document.getElementById('console-box').scrollHeight;
+          });
+      }
+      setInterval(refreshConsole, 1500); // refresh every 1.5s
+    </script>
+
+  </div>
+</body>
+</html>
